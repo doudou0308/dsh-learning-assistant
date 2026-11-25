@@ -320,6 +320,12 @@ ok("只保留对话里出现的词", scoped.length === 1 && scoped[0].term === "
 ok("大小写不敏感", guide.filterTermsForText([{ term: "vla" }], "VLA 是模型").length === 1);
 ok("空对话返回空", guide.filterTermsForText(allTerms, "").length === 0);
 ok("无关对话返回空", guide.filterTermsForText(allTerms, "今天天气不错").length === 0);
+const boundaryTerms = [{ term: "API" }, { term: "RL" }, { term: "C++" }, { term: "神经网络" }];
+const falseHits = "Review the capital, URL, API2 and API_CLIENT.";
+ok("英文单词和标识符内部的片段不入侧栏", guide.filterTermsForText(boundaryTerms, falseHits).length === 0);
+ok("缩写紧贴中文时仍能匹配", guide.filterTermsForText(boundaryTerms, "调用api接口，再用RL训练").length === 2);
+ok("术语里的符号按字面匹配", guide.filterTermsForText(boundaryTerms, "使用C++").map((t) => t.term).join() === "C++");
+ok("纯中文术语仍能匹配", guide.filterTermsForText(boundaryTerms, "学习神经网络基础").map((t) => t.term).join() === "神经网络");
 
 console.log(`\n${failures === 0 ? "全部通过 ✅" : `${failures} 项失败 ❌`}`);
 process.exit(failures === 0 ? 0 : 1);

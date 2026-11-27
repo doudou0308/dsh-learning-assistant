@@ -291,12 +291,14 @@ ok("环形关系不会死循环", cyclic.length === 2 && cyclic.every((n) => n.c
 
 // ---------- 5. Deterministic candidate extraction ----------
 console.log("\n== 5) 自动补充的候选抽取 ==");
-const answer = "VLA 是视觉-语言-动作模型。常见框架有 OpenVLA、π0、GR00T。VLA 与 RT-2 一脉相承，部署时常用 ROS2 和 CUDA。";
+const answer = "VLA 是视觉-语言-动作模型。常见框架有 OpenVLA、π0、GR00T。VLA 与 RT-2 一脉相承，部署时常用 ROS2 和 CUDA，系统使用 RTOS 调度。";
 const picked = guide.extractCandidates(answer, ["RTOS", "KV Cache"], 3);
 ok("抽出未收录的缩写", picked.includes("VLA"), picked.join(","));
 ok("已在记忆的词不重复", !picked.includes("RTOS"), picked.join(","));
-ok("通用缩写被过滤", !picked.includes("CUDA") || true, picked.join(","));
-ok("数量受 limit 限制", guide.extractCandidates(answer, [], 2).length <= 2);
+const stopwordCandidates = guide.extractCandidates("API 与 CUDA", [], 5);
+ok("停用表中的 API 被过滤", !stopwordCandidates.includes("API"), stopwordCandidates.join(","));
+ok("未列入停用表的 CUDA 保留为候选", stopwordCandidates.includes("CUDA"), stopwordCandidates.join(","));
+ok("数量受 limit 限制", guide.extractCandidates(answer, [], 2).length === 2);
 ok("按出现次数排序（VLA 出现两次在前）", picked[0] === "VLA", picked.join(","));
 ok("空文本返回空数组", guide.extractCandidates("", ["x"], 2).length === 0);
 
